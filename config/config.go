@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"regexp"
+	//"github.com/davecgh/go-spew/spew"
 
 	"github.com/naoina/toml"
 )
@@ -11,9 +12,10 @@ import (
 // It is a list of HTTP and/or UDP relays
 // Each relay has its own list of backends
 type Config struct {
-	HTTPRelays []HTTPConfig `toml:"http"`
-	UDPRelays  []UDPConfig  `toml:"udp"`
-	Filters    Filters      `toml:"filter"`
+	Metrics	   MetricsConfig	`toml:"metrics-server"`
+	HTTPRelays []HTTPConfig 	`toml:"http"`
+	UDPRelays  []UDPConfig  	`toml:"udp"`
+	Filters    Filters      	`toml:"filter"`
 	Verbose    bool
 }
 
@@ -43,6 +45,13 @@ type Filter struct {
 
 // Filters is a type representing an array of Filter, wow
 type Filters []Filter
+
+// MetricsConfig represents configuration params for prom server
+type MetricsConfig struct {
+	// Addr should be set to the desired listening host:port default
+	// to constant specified in metrics package
+	Addr string `toml:"bind-addr"`
+}
 
 // HTTPConfig represents an HTTP relay
 type HTTPConfig struct {
@@ -207,5 +216,8 @@ func LoadConfigFile(filename string) (Config, error) {
 		}
 		err = cfg.Filters.LoadRegexps()
 	}
+
+	//DEBUG: helpful for debugging
+	// spew.Dump(cfg)
 	return cfg, err
 }

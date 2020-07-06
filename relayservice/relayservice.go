@@ -43,7 +43,7 @@ func New(config config.Config) (*Service, error) {
 		s.relays[u.Name()] = u
 	}
 
-	ms, err := metric.NewServer()
+	ms, err := metric.NewServer(config.Metrics.Addr)
 	if err != nil {
 		return nil, err
 	}

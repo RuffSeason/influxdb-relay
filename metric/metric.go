@@ -42,7 +42,7 @@ func (s *Server) Stop() error {
 }
 
 // NewServer returns a metric server
-func NewServer() (*Server, error) {
+func NewServer(addr string) (*Server, error) {
 	promExporter, err := ocprom.NewExporter(
 		ocprom.Options{
 			Registerer: prometheus.DefaultRegisterer,
@@ -53,8 +53,17 @@ func NewServer() (*Server, error) {
 	}
 	view.RegisterExporter(promExporter)
 
+	// if bindAddr was not specified in toml, we should use
+	// the default constant provided in this package
+	var listenAddr string
+	if addr == "" {
+		listenAddr = defaultAddr
+	} else {
+		listenAddr = addr
+	}
+
 	return &Server{
-		h:  &http.Server{Addr: defaultAddr},
+		h:  &http.Server{Addr: listenAddr},
 		pe: promExporter,
 	}, nil
 }
