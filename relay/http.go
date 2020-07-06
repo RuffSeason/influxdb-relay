@@ -319,6 +319,8 @@ type httpBackend struct {
 
 	tagRegexps         []*regexp.Regexp
 	measurementRegexps []*regexp.Regexp
+
+	skipTLSVerification bool
 }
 
 // validateRegexps checks if a request on this backend matches
@@ -416,12 +418,13 @@ func newHTTPBackend(cfg *config.HTTPOutputConfig, fs config.Filters) (*httpBacke
 	}
 
 	return &httpBackend{
-		poster:             p,
-		name:               cfg.Name,
-		tagRegexps:         tagRegexps,
-		measurementRegexps: measurementRegexps,
-		endpoints:          cfg.Endpoints,
-		location:           cfg.Location,
+		poster:             	p,
+		name:               	cfg.Name,
+		tagRegexps:         	tagRegexps,
+		measurementRegexps: 	measurementRegexps,
+		endpoints:          	cfg.Endpoints,
+		location:           	cfg.Location,
+		skipTLSVerification:	cfg.SkipTLSVerification,
 	}, nil
 }
 
