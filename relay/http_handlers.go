@@ -56,6 +56,8 @@ type healthReport struct {
 }
 
 func (h *HTTP) handleHealth(w http.ResponseWriter, _ *http.Request, _ time.Time) {
+
+	//https://github.com/golang/go/issues/24719
 	var responses = make(chan health, len(h.backends))
 	var wg sync.WaitGroup
 	var validEndpoints = 0
@@ -72,6 +74,7 @@ func (h *HTTP) handleHealth(w http.ResponseWriter, _ *http.Request, _ time.Time)
 			var healthCheck = health{name: b.name, err: nil}
 
 			transport := &http.Transport{
+				DisableKeepAlives: true,
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: b.skipTLSVerification,
 				},
