@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"crypto/tls"
 	"time"
 
 	"github.com/influxdata/influxdb/models"
@@ -73,20 +72,8 @@ func (h *HTTP) handleHealth(w http.ResponseWriter, _ *http.Request, _ time.Time)
 
 			var healthCheck = health{name: b.name, err: nil}
 
-			transport := &http.Transport{
-				DisableKeepAlives: true,
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: b.skipTLSVerification,
-				},
-			}
-
-			client := http.Client{
-				Timeout: h.healthTimeout,
-				Transport: transport,
-			}
-
 			start := time.Now()
-			res, err := client.Get(b.location + b.endpoints.Ping)
+			res, err := b.client.Get(b.location + b.endpoints.Ping)
 
 			if err != nil {
 				if h.log {

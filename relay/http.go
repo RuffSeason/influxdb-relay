@@ -273,6 +273,21 @@ func newSimplePoster(location string, timeout time.Duration, skipTLSVerification
 	}
 }
 
+func newBackendClient(location string, timeout time.Duration, skipTLSVerification bool) *http.Client {
+	// Configure custom transport for http.Client
+	// Used for support skip-tls-verification option
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: skipTLSVerification,
+		},
+	}
+
+	return &http.Client{
+			Timeout:   timeout,
+			Transport: transport,
+		}
+}
+
 func (s *simplePoster) getStats() stats {
 	return simpleStats{Location: s.location}
 }
@@ -311,6 +326,7 @@ func (s *simplePoster) post(buf []byte, query string, auth string, endpoint stri
 
 type httpBackend struct {
 	poster
+	client	  http.Client
 	name      string
 	inputType config.Input
 	admin     string
@@ -378,7 +394,7 @@ func newHTTPBackend(cfg *config.HTTPOutputConfig, fs config.Filters) (*httpBacke
 
 	// Get underlying Poster instance
 	var p poster = newSimplePoster(cfg.Location, timeout, cfg.SkipTLSVerification)
-
+	c := newBackendClient(cfg.Location, timeout, cfg.SkipTLSVerification)
 	// If configured, create a retryBuffer per backend.
 	// This way we serialize retries against each backend.
 	if cfg.BufferSizeMB > 0 {
@@ -419,6 +435,7 @@ func newHTTPBackend(cfg *config.HTTPOutputConfig, fs config.Filters) (*httpBacke
 
 	return &httpBackend{
 		poster:             	p,
+		client:					*c,
 		name:               	cfg.Name,
 		tagRegexps:         	tagRegexps,
 		measurementRegexps: 	measurementRegexps,
